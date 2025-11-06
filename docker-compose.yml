@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+
+  auth-service:
+    build: ./src/auth-service
+    container_name: auth-service
+    depends_on:
+      - mongo
+    ports:
+      - "5001:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/auth_db
+
+  gateway-service:
+    build: ./src/gateway-service
+    container_name: gateway-service
+    depends_on:
+      - rabbitmq
+      - mongo
+      - auth-service
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGODB_MP3S_URI=mongodb://mongo:27017/mp3s
+      - MONGODB_VIDEOS_URI=mongodb://mongo:27017/videos
+      - RABBITMQ_HOST=rabbitmq
+      - AUTH_SERVICE=http://auth-service:5000
+
+  converter-service:
+    build: ./src/converter-service
+    container_name: converter-service
+    depends_on:
+      - rabbitmq
+      - mongo
+    environment:
+      - MONGODB_MP3S_URI=mongodb://mongo:27017/mp3s
+      - RABBITMQ_HOST=rabbitmq
+
+  notification-service:
+    build: ./src/notification-service
+    container_name: notification-service
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq

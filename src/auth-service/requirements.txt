@@ -1,0 +1,8 @@
+Flask==2.2.2
+# Using psycopg2-binary for PostgreSQL connectivity in the auth service
+psycopg2-binary==2.9.7
+Flask-Cors==4.0.0
+PyJWT==2.6.0
+bcrypt==4.0.1
+Werkzeug==2.2.2
+python-dotenv==1.0.0
